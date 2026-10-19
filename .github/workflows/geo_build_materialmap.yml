@@ -1,0 +1,74 @@
+name: geometry_woTOF_test
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # Runs daily at 03:00 UTC  
+  workflow_dispatch:
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - LCG: "LCG_108/x86_64-el9-gcc14-opt"
+            LCG_NAME: "LCG_108-x86_64-el9-gcc14-opt"
+          - LCG: "LCG_107/x86_64-el9-gcc13-opt"
+            LCG_NAME: "LCG_107-x86_64-el9-gcc13-opt"
+        #LCG: ["LCG_108/x86_64-el9-gcc14-opt",  
+        #      "LCG_107/x86_64-el9-gcc13-opt"]  
+    steps:
+    
+    - uses: actions/checkout@v4
+    - uses: cvmfs-contrib/github-action-cvmfs@v4
+    - uses: aidasoft/run-lcg-view@v5
+      with:
+        release-platform: ${{ matrix.LCG }}
+        ccache-key: ccache-el9-${{ matrix.LCG }}
+        run: |
+          echo "::group:: Checkout ACTS"
+          git clone https://github.com/acts-project/acts.git
+          echo "::group:: ACTS Cmake"
+          cmake -S acts -B acts/build -DACTS_BUILD_PLUGIN_GEANT4=on \
+          -DACTS_BUILD_PLUGIN_JSON=on \
+          -DACTS_BUILD_PLUGIN_ROOT=on \
+          -DACTS_BUILD_EXAMPLES_ROOT=on \
+          -DACTS_BUILD_FATRAS=on \
+          -DACTS_BUILD_FATRAS_GEANT4=on \
+          -DACTS_BUILD_EXAMPLES_GEANT4=on \
+          -DACTS_BUILD_EXAMPLES_PYTHON_BINDINGS=on \
+          -DACTS_BUILD_ANALYSIS_APPS=on \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DACTS_BUILD_EXAMPLES_PYTHIA8=on
+          echo "::group:: BUILD ACTS"
+          cmake --build acts/build -- -j$(nproc)
+          echo "::group:: Setup ACTS"
+          source acts/build/this_acts.sh
+          source acts/build/python/setup.sh
+          export ACTS_SEQUENCER_DISABLE_FPEMON=1
+          echo "::group:: Setup alice3 python package"
+          source setup.sh
+          echo "::group:: Run geometry modifications"
+          cd geometries/utilities/scripts_geometry_modification/
+          cp ../../geometry_2026_02_23_MarcoVL_peacock_iriscylinder_or_segmented/geom/original_iris_cylinder/o2sim_geometry_peacock_v2.root o2sim_geometry.root
+          ./run_all_modifications.sh
+          cp o2sim_geometry.root ../../geometry_2026_02_23_MarcoVL_peacock_iriscylinder_or_segmented/geom/
+          cp o2sim_geometry.gdml ../../geometry_2026_02_23_MarcoVL_peacock_iriscylinder_or_segmented/geom/
+          cd -
+          echo "::group:: Run material map and plotting"
+          cd geometries/utilities/scripts_material_mapping/
+          #./run_material_mapping.sh --geometry $PWD/../../geometry_2026_02_23_MarcoVL_peacock_iriscylinder_or_segmented/geom/
+    
+#    - if: always()    
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: geometry-woTOF_iris-${{ matrix.LCG_NAME }}
+#        path: alice3/test_woTOF_iris/
+

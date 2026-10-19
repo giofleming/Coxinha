@@ -1,0 +1,66 @@
+name: run_test
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # Runs daily at 03:00 UTC  
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        LCG: ["LCG_108/x86_64-el9-gcc14-opt",  
+              "LCG_107/x86_64-el9-gcc13-opt"]  
+    steps:
+    - uses: actions/checkout@v4
+    - name: Configure Git for submodules
+      env:
+        GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+      run: |
+        git config --global url."https://oauth2:${GITLAB_TOKEN}@gitlab.cern.ch/".insteadOf "https://gitlab.cern.ch/"
+        git submodule update --init --recursive
+    - uses: cvmfs-contrib/github-action-cvmfs@v4
+    - uses: aidasoft/run-lcg-view@v5
+      with:
+        release-platform: ${{ matrix.LCG }}
+        ccache-key: ccache-el9-${{ matrix.LCG }}
+        run: |
+          echo "::group:: Checkout ACTS"
+          git clone https://github.com/acts-project/acts.git
+          echo "::group:: ACTS Cmake"
+          cmake -S acts -B acts/build -DACTS_BUILD_PLUGIN_GEANT4=on \
+          -DACTS_BUILD_PLUGIN_JSON=on \
+          -DACTS_BUILD_PLUGIN_ROOT=on \
+          -DACTS_BUILD_EXAMPLES_ROOT=on \
+          -DACTS_BUILD_FATRAS=on \
+          -DACTS_BUILD_FATRAS_GEANT4=on \
+          -DACTS_BUILD_EXAMPLES_GEANT4=on \
+          -DACTS_BUILD_PYTHON_BINDINGS=on \
+          -DACTS_BUILD_ANALYSIS_APPS=on \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DACTS_BUILD_EXAMPLES_PYTHIA8=on \
+          -DCMAKE_INSTALL_PREFIX=acts/install
+          echo "::group:: BUILD ACTS"
+          cmake --build acts/build -- -j$(nproc) install
+          echo "::group:: Setup ACTS"
+          source acts/install/bin/this_acts.sh
+          export ACTS_SEQUENCER_DISABLE_FPEMON=1
+          echo "::group:: Run Alice3 single particle test"
+          source setup.sh
+          mkdir build && cd build
+          cmake -DCMAKE_PREFIX_PATH=${PWD}/../acts/install ..
+          make -j2
+          cd ..
+          python alice3_full_chain.py
+

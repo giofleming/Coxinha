@@ -1,0 +1,22 @@
+*~
+tree.root
+lut_*.dat
+lut_*.root
+__pycache__/                                                                                                                  
+build/                                                                                                                        
+output/
+*.DS_Store
+*__MACOSX
+*.dat
+*.pcm
+*_dictUmbrella.*
+*_dictContent.*
+*.d
+*.so
+
+# Geometry Modificiation and Material mapping
+geometries/utilities/scripts_geometry_modification/o2sim_geometry*
+geometries/utilities/scripts_geometry_modification/original_O2_geometry
+geometries/utilities/scripts_material_mapping/CheckMaterial.exe
+geometries/utilities/scripts_material_mapping/material_map.json
+geometries/utilities/scripts_material_mapping/*.root

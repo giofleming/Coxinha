@@ -1,0 +1,47 @@
+[
+    {
+        "NAME": "MiddleDisks::NegativeEndcap z=-1227",
+        "layer": 3,
+        "volume": 30
+    },
+    {
+        "NAME": "MiddleDisks::NegativeEndcap z=-1007",
+        "layer": 7,
+        "volume": 30
+    },
+    {
+        "NAME": "MiddleDisks::NegativeEndcap z=-777",
+        "layer": 11,
+        "volume": 30
+    },
+    {
+        "NAME": "InnerTracker::Barrel r=71",
+        "layer": 9,
+        "volume": 40
+    },
+    {
+        "NAME": "InnerTracker::Barrel r=91",
+        "layer": 11,
+        "volume": 40
+    },
+    {
+        "NAME": "InnerTracker::Barrel r=121",
+        "layer": 13,
+        "volume": 40
+    },
+    {
+        "NAME": "MiddleDisks::PositiveEndcap z=777",
+        "layer": 3,
+        "volume": 60
+    },
+    {
+        "NAME": "MiddleDisks::PositiveEndcap z=1007",
+        "layer": 7,
+        "volume": 60
+    },
+    {
+        "NAME": "MiddleDisks::PositiveEndcap z=1227",
+        "layer": 11,
+        "volume": 60
+    }
+]

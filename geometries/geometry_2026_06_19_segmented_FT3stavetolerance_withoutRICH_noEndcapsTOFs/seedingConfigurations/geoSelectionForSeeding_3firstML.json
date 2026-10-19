@@ -1,0 +1,47 @@
+[
+    {
+        "NAME": "OuterPixels::NegativeEndcap",
+        "layer": 2,
+        "volume": 17
+    },
+    {
+        "NAME": "OuterPixels::NegativeEndcap",
+        "layer": 4,
+        "volume": 17
+    },
+    {
+        "NAME": "OuterPixels::NegativeEndcap",
+        "layer": 6,
+        "volume": 17
+    },    
+    {
+        "NAME": "OuterPixels::Barrel",
+        "layer": 2,
+        "volume": 18
+    },
+    {
+        "NAME": "OuterPixels::Barrel",
+        "layer": 4,
+        "volume": 18
+    },
+    {
+        "NAME": "OuterPixels::Barrel",
+        "layer": 6,
+        "volume": 18
+    },
+    {
+        "NAME": "OuterPixels::PositiveEndcap",
+        "layer": 2,
+        "volume": 19
+    },
+    {
+        "NAME": "OuterPixels::PositiveEndcap",
+        "layer": 4,
+        "volume": 19
+    },
+    {
+        "NAME": "OuterPixels::PositiveEndcap",
+        "layer": 6,
+        "volume": 19
+    }
+]

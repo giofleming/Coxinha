@@ -1,0 +1,5 @@
+add_subdirectory(ExampleAlgorithms)
+add_subdirectory(Geometry)
+add_subdirectory(O2Interface)
+#add_subdirectory(Validation)
+add_subdirectory(python)

@@ -1,0 +1,32 @@
+[
+    {
+        "NAME": "VertexDetector::Barrel r=5",
+        "volume": 40,
+        "layer": 1
+    },
+    {
+        "NAME": "VertexDetector::Barrel r=12",
+        "volume": 40,
+        "layer": 3
+    },
+    {
+        "NAME": "VertexDetector::Barrel r=25",
+        "volume": 40,
+        "layer": 5
+    },
+    {
+        "NAME": "InnerTracker::Barrel r=71",
+        "volume": 40,
+        "layer": 9
+    },
+    {
+        "NAME": "InnerTracker::Barrel r=91",
+        "volume": 40,
+        "layer": 11
+    },
+    {
+        "NAME": "InnerTracker::Barrel r=121",
+        "volume": 40,
+        "layer": 13
+    }
+]

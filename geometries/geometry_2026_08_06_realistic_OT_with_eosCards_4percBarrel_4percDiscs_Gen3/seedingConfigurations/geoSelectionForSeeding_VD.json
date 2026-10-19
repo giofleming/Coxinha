@@ -1,0 +1,17 @@
+[
+    {
+        "NAME": "VertexDetector::Barrel r=5",
+        "layer": 1,
+        "volume": 40
+    },
+    {
+        "NAME": "VertexDetector::Barrel r=12",
+        "layer": 3,
+        "volume": 40
+    },
+    {
+        "NAME": "VertexDetector::Barrel r=25",
+        "layer": 5,
+        "volume": 40
+    }
+]

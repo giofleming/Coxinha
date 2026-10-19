@@ -1,0 +1,117 @@
+[
+    {
+        "NAME": "OuterDisks::NegativeEndcap z=-2207",
+        "layer": 7,
+        "volume": 20
+    },
+    {
+        "NAME": "OuterDisks::NegativeEndcap z=-1807",
+        "layer": 9,
+        "volume": 20
+    },
+    {
+        "NAME": "OuterDisks::NegativeEndcap z=-1507",
+        "layer": 11,
+        "volume": 20
+    },
+    {
+        "NAME": "MiddleDisks::NegativeEndcap z=-1227",
+        "layer": 3,
+        "volume": 30
+    },
+    {
+        "NAME": "MiddleDisks::NegativeEndcap z=-1007",
+        "layer": 7,
+        "volume": 30
+    },
+    {
+        "NAME": "MiddleDisks::NegativeEndcap z=-777",
+        "layer": 11,
+        "volume": 30
+    },
+    {
+        "NAME": "VertexDetector::Barrel r=5",
+        "layer": 1,
+        "volume": 40
+    },
+    {
+        "NAME": "VertexDetector::Barrel r=12",
+        "layer": 3,
+        "volume": 40
+    },
+    {
+        "NAME": "VertexDetector::Barrel r=25",
+        "layer": 5,
+        "volume": 40
+    },
+    {
+        "NAME": "InnerTracker::Barrel r=71",
+        "layer": 9,
+        "volume": 40
+    },
+    {
+        "NAME": "InnerTracker::Barrel r=91",
+        "layer": 11,
+        "volume": 40
+    },
+    {
+        "NAME": "InnerTracker::Barrel r=121",
+        "layer": 13,
+        "volume": 40
+    },
+    {
+        "NAME": "InnerTracker::Barrel r=194",
+        "layer": 15,
+        "volume": 40
+    },
+    {
+        "NAME": "InnerTracker::Barrel r=305",
+        "layer": 19,
+        "volume": 40
+    },
+    {
+        "NAME": "OuterTracker::Barrel r=450",
+        "layer": 3,
+        "volume": 50
+    },
+    {
+        "NAME": "OuterTracker::Barrel r=600",
+        "layer": 5,
+        "volume": 50
+    },
+    {
+        "NAME": "OuterTracker::Barrel r=800",
+        "layer": 7,
+        "volume": 50
+    },
+    {
+        "NAME": "MiddleDisks::PositiveEndcap z=777",
+        "layer": 3,
+        "volume": 60
+    },
+    {
+        "NAME": "MiddleDisks::PositiveEndcap z=1007",
+        "layer": 7,
+        "volume": 60
+    },
+    {
+        "NAME": "MiddleDisks::PositiveEndcap z=1227",
+        "layer": 11,
+        "volume": 60
+    },
+    {
+        "NAME": "OuterDisks::PositiveEndcap z=1507",
+        "layer": 4,
+        "volume": 70
+    },
+    {
+        "NAME": "OuterDisks::PositiveEndcap z=1807",
+        "layer": 6,
+        "volume": 70
+    },
+    {
+        "NAME": "OuterDisks::PositiveEndcap z=2207",
+        "layer": 8,
+        "volume": 70
+    }
+]

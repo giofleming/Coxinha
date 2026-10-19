@@ -1,0 +1,1 @@
+../geometries/magneticFieldMaps/solenoid_R1625_L6500_B2T_scaled.txt

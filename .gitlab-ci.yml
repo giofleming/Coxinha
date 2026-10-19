@@ -1,0 +1,503 @@
+stages:
+  - build
+  - test
+  - compare
+
+variables:
+  LCG: "LCG_108/x86_64-el9-gcc14-opt"
+  CCACHE_DIR: ${CI_PROJECT_DIR}/ccache
+  CCACHE_MAXSIZE: 2G
+  NEVENTS: 10
+  NEVENTS_PBPB: 5
+  DEFAULT_GEOMETRIES: >-
+    geometry_2026_06_10_segmented_withRICH_noEndcapTOFs
+    geometry_2026_06_10_segmented_withoutRICH_noEndcapTOFs
+  #CCACHE_KEY_SUFFIX: r2
+  ALIBUILD_JOBS: "8"
+
+default:
+  # Use CERN-supported container with LCG/CVMFS access
+  image: gitlab-registry.cern.ch/acts/acts-athena-ci/alma9-atlasos-dev:v2
+  cache:
+    - key: ccache-${CI_JOB_NAME}-${CI_COMMIT_REF_SLUG}
+      fallback_keys:
+        - ccache-${CI_JOB_NAME}-main
+      when: always
+      paths:
+        - ${CCACHE_DIR}
+  #image: gitlab-registry.cern.ch/linuxsupport/alma9-base:latest
+  before_script:
+    - echo "Container ready, build tools available"
+    - dnf install -y --disablerepo="tdaq*" motif motif-devel
+    - export LD_LIBRARY_PATH=/usr/lib64:$LD_LIBRARY_PATH
+
+# -----------------------
+# BUILD ACTS
+# -----------------------
+build_acts:
+  stage: build
+  tags:
+    - cvmfs
+  script:
+    - echo "::group::Setup LCG"
+    - ls /cvmfs/
+    - source /cvmfs/sft.cern.ch/lcg/views/${LCG}/setup.sh
+
+    - echo "::group::Checkout ACTS"
+    # upstream ACTS main, pinned to the commit actso2 was validated against
+    # (outputs bit-identical to tdr-branch for pp + 30 PU)
+    #- git clone https://github.com/pbutti/acts.git -b tdr-branch
+    #- git clone https://github.com/acts-project/acts.git && git -C acts checkout 458e2ca5d
+    - git clone https://github.com/acts-project/acts.git
+    
+    
+    - echo "::group::Configure ACTS"
+    - rm -rf acts/build
+    - cmake -S acts -B acts/build -DACTS_BUILD_ALIGNMENT=ON -DACTS_BUILD_PLUGIN_GEANT4=on -DACTS_BUILD_PLUGIN_JSON=on -DACTS_BUILD_PLUGIN_ROOT=on -DACTS_BUILD_EXAMPLES_ROOT=on -DACTS_BUILD_FATRAS=on -DACTS_BUILD_FATRAS_GEANT4=on -DACTS_BUILD_EXAMPLES_GEANT4=on -DACTS_BUILD_PYTHON_BINDINGS=on -DACTS_BUILD_ANALYSIS_APPS=on -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DACTS_BUILD_EXAMPLES_PYTHIA8=on -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$CI_PROJECT_DIR/acts/install
+
+    - echo "::group::Build ACTS"
+    - ccache -z
+    - cmake --build acts/build --target install -j$(nproc)
+    - ccache -s
+    - echo "::group::ACTS_SOURCE_DIR=${ACTS_SOURCE_DIR}"
+  artifacts:
+    paths:
+      - acts/install
+      - acts/Examples/Algorithms/Digitization/include
+      - acts/Examples/Algorithms/TrackFinding/include
+      - acts/Examples/Detectors/Common/include
+    expire_in: 1 day
+
+# -----------------------
+# TEST TEMPLATE
+# -----------------------
+.test_template:
+  stage: test
+  tags:
+    - cvmfs
+  needs:
+    - job: build_acts
+      artifacts: true
+  before_script:
+    - echo "::group::Install runtime dependencies"
+    - dnf install -y motif motif-devel
+    - echo "::group::Setup LCG"
+    - source /cvmfs/sft.cern.ch/lcg/views/${LCG}/setup.sh
+
+    - echo "::group::Setup ACTS"
+    - source acts/install/bin/this_acts.sh
+    - export ACTS_SEQUENCER_DISABLE_FPEMON=1
+
+    - echo "::group::Build project"
+    - source setup.sh
+    - mkdir -p build && cd build
+    - cmake -DCMAKE_PREFIX_PATH=${PWD}/../acts/install ..
+    - make -j2
+    - cd ..
+
+# -----------------------
+# TEST JOBS
+# -----------------------
+test_alice3_default_geometries:
+  extends: .test_template
+  parallel:
+    matrix:
+      - GEOMETRY:
+          - geometry_2026_06_10_segmented_withRICH_noEndcapTOFs
+          - geometry_2026_06_10_segmented_withoutRICH_noEndcapTOFs
+  script:
+    - echo "::group::Running Alice3 full chain test for $GEOMETRY"
+    - ldd acts/install/python/acts/examples/ActsExamplesPythonBindings*.so | grep Xm
+    - | # needed to avoid \ cutting the command and thus missing the full output path argument
+      python CI/scripts/full_chain_wrapper.py -g "$GEOMETRY" -n $NEVENTS --nThreads 1 --config job_configs/pp_gen3.py \
+        --full_output_path monitoring_output_$GEOMETRY
+  artifacts:
+    paths:
+      - output/monitoring_output_$GEOMETRY
+    expire_in: 10 days
+
+
+# check all geometries that have been added or modified in the merge request
+# 1. check all Added or Modified geos
+# 2. remove any geos that are listed as default geos (already ran over)
+# 3. run the test for the remaining geos
+test_alice3_geometry_changes:
+  extends: .test_template
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "geometries/**/*"
+  script:
+    - echo "::group::Running Alice3 geometry changes test"
+    - ldd acts/install/python/acts/examples/ActsExamplesPythonBindings*.so | grep Xm
+    - | # check Added and Modified geometries: needs to be top level geometries dir
+      AFFECTED_DIRS=$(git diff --name-only --diff-filter=AM ${CI_MERGE_REQUEST_DIFF_BASE_SHA} -- geometries/ \
+        | awk -F/ '{print $2}' | sort -u)
+
+      TO_TEST=""
+      for DIR in $AFFECTED_DIRS; do
+        if echo "$DEFAULT_GEOMETRIES" | grep -qw "$DIR"; then
+          echo "Skipping $DIR (already covered by default geometry run)"
+        elif [ ! -d "geometries/$DIR/geom" ]; then
+          echo "Skipping $DIR (not a geometry: no geom/ subdirectory)"
+        else
+          TO_TEST="$TO_TEST $DIR"
+        fi
+      done
+
+      if [ -z "$TO_TEST" ]; then
+        echo "No geometry directories to test beyond defaults, skipping"
+        touch $CI_PROJECT_DIR/to_test_geometries.txt  # empty marker so the compare job can detect "nothing to do"
+        exit 0
+      fi
+
+      echo "$TO_TEST" > $CI_PROJECT_DIR/to_test_geometries.txt
+
+      for GEOMETRY in $TO_TEST; do
+        echo "::group::Testing geometry: $GEOMETRY"
+        python CI/scripts/full_chain_wrapper.py -g "$GEOMETRY" -n $NEVENTS --nThreads 1 --config job_configs/pp_gen3.py \
+          --full_output_path monitoring_output_$GEOMETRY
+      done
+  artifacts:
+    paths:
+      - output/monitoring_output_*
+      - to_test_geometries.txt
+    expire_in: 10 days
+
+
+test_alice3_PbPbCentral:
+  extends: .test_template
+  parallel:
+    matrix:
+      - GEOMETRY:
+          - geometry_2026_06_10_segmented_withoutRICH_noEndcapTOFs
+  script:
+    - echo "::group::Running Alice3 full chain test on PbPbCentral for $GEOMETRY"
+    - ldd acts/install/python/acts/examples/ActsExamplesPythonBindings*.so | grep Xm
+    - | # needed to avoid \ cutting the command and thus missing the full output path argument
+      python CI/scripts/full_chain_wrapper.py -g "$GEOMETRY" -n $NEVENTS_PBPB --nThreads 1 --config job_configs/PbPbCentral.py \
+        --full_output_path monitoring_output_PbPbCentral_$GEOMETRY
+  artifacts:
+    paths:
+      - output/monitoring_output_PbPbCentral_$GEOMETRY
+    expire_in: 10 days
+
+
+# check all geometries that have been added or modified in the merge request
+# 1. check all Added or Modified geos
+# 2. remove any geos that are listed as default geos (already ran over)
+# 3. run the test for the remaining geos
+test_alice3_geometry_changes:
+  extends: .test_template
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "geometries/**/*"
+  script:
+    - echo "::group::Running Alice3 geometry changes test"
+    - ldd acts/install/python/acts/examples/ActsExamplesPythonBindings*.so | grep Xm
+    - | # check Added and Modified geometries: needs to be top level geometries dir
+      AFFECTED_DIRS=$(git diff --name-only --diff-filter=AM ${CI_MERGE_REQUEST_DIFF_BASE_SHA} -- geometries/ \
+        | awk -F/ '{print $2}' | sort -u)
+
+      TO_TEST=""
+      for DIR in $AFFECTED_DIRS; do
+        if echo "$DEFAULT_GEOMETRIES" | grep -qw "$DIR"; then
+          echo "Skipping $DIR (already covered by default geometry run)"
+        elif [ ! -d "geometries/$DIR/geom" ]; then
+          echo "Skipping $DIR (not a geometry: no geom/ subdirectory)"
+        else
+          TO_TEST="$TO_TEST $DIR"
+        fi
+      done
+
+      if [ -z "$TO_TEST" ]; then
+        echo "No geometry directories to test beyond defaults, skipping"
+        touch $CI_PROJECT_DIR/to_test_geometries.txt  # empty marker so the compare job can detect "nothing to do"
+        exit 0
+      fi
+
+      echo "$TO_TEST" > $CI_PROJECT_DIR/to_test_geometries.txt
+
+      for GEOMETRY in $TO_TEST; do
+        echo "::group::Testing geometry: $GEOMETRY"
+        python CI/scripts/full_chain_wrapper.py -g "$GEOMETRY" -n $NEVENTS --nThreads 1 --config job_configs/pp_gen3.py \
+          --full_output_path monitoring_output_$GEOMETRY
+      done
+  artifacts:
+    paths:
+      - output/monitoring_output_*
+      - to_test_geometries.txt
+    expire_in: 10 days
+
+
+test_alice3_lut_creation:
+  extends: .test_template
+  parallel:
+    matrix:
+      - GEOMETRY:
+          - geometry_2026_06_10_segmented_withoutRICH_noEndcapTOFs
+  script:
+    - echo "::group::Running Alice3 LUT creation test for $GEOMETRY"
+    - ldd acts/install/python/acts/examples/ActsExamplesPythonBindings*.so | grep Xm
+    - | # needed to avoid \ cutting the command and thus missing the full output path argument
+      python CI/scripts/full_chain_wrapper.py -g "$GEOMETRY" -n 100 --nThreads 1 --enable-lut --config job_configs/gun_Pions.py\
+        --full_output_path monitoring_output_lut_$GEOMETRY
+  artifacts:
+    paths:
+      - output/monitoring_output_lut_$GEOMETRY
+    expire_in: 1 days
+
+
+# ------------------------
+# COMPARE OUTPUTS 
+# ------------------------
+
+compare_alice3_default_geometries:
+  stage: compare
+  tags:
+    - cvmfs
+  needs:
+    - job: test_alice3_default_geometries
+      artifacts: true
+  parallel:
+    matrix:
+      - GEOMETRY:
+          - geometry_2026_06_10_segmented_withRICH_noEndcapTOFs
+          - geometry_2026_06_10_segmented_withoutRICH_noEndcapTOFs
+  before_script:
+    # To get root and everything else
+    - dnf install -y poppler-utils
+    - source /cvmfs/sft.cern.ch/lcg/views/${LCG}/setup.sh
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.cern.ch/pibutti/indetmplib.git
+    - source indetmplib/setup_python.sh
+  script:
+    - echo "::group::Comparing monitoring output of default geometries to reference"
+    - >-
+      python indetmplib/alice3/performance/plots/compare_monitoring.py 
+      --reference $CI_PROJECT_DIR/reference_files/pp_30pu/ 
+      --candidate $CI_PROJECT_DIR/output/monitoring_output_$GEOMETRY/
+      --output_dir comparison_output/$GEOMETRY
+    - python CI/scripts/generate_index.py --output-dir comparison_output/$GEOMETRY --title test --convert-to-png
+  artifacts:
+    paths:
+      - comparison_output/
+    expire_in: 10 days
+    when: always
+
+compare_alice3_PbPbCentral:
+  stage: compare
+  tags:
+    - cvmfs
+  needs:
+    - job: test_alice3_PbPbCentral
+      artifacts: true
+  parallel:
+    matrix:
+      - GEOMETRY:
+          - geometry_2026_06_10_segmented_withoutRICH_noEndcapTOFs
+  before_script:
+    # To get root and everything else
+    - dnf install -y poppler-utils
+    - source /cvmfs/sft.cern.ch/lcg/views/${LCG}/setup.sh
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.cern.ch/pibutti/indetmplib.git
+    - source indetmplib/setup_python.sh
+  script:
+    - echo "::group::Comparing monitoring output of default geometries to reference"
+    - >-
+      python indetmplib/alice3/performance/plots/compare_monitoring.py
+      --reference $CI_PROJECT_DIR/reference_files/PbPbCentral/
+      --candidate $CI_PROJECT_DIR/output/monitoring_output_PbPbCentral_$GEOMETRY
+      --output_dir comparison_output_PbPbCentral/PbPbCentral_$GEOMETRY
+    - python CI/scripts/generate_index.py --output-dir comparison_output_PbPbCentral/PbPbCentral_$GEOMETRY --title test --convert-to-png
+  artifacts:
+    paths:
+      - comparison_output_PbPbCentral/
+    expire_in: 10 days
+    when: always
+
+
+compare_alice3_geometry_changes:
+  stage: compare
+  tags:
+    - cvmfs
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    changes:
+      - "geometries/**/*"
+  needs:
+    - job: test_alice3_geometry_changes
+      artifacts: true
+  before_script:
+    # To get root and everything else
+    - dnf install -y poppler-utils
+    - source /cvmfs/sft.cern.ch/lcg/views/${LCG}/setup.sh
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.cern.ch/pibutti/indetmplib.git
+    - source indetmplib/setup_python.sh
+  script:
+    - echo "::group::Comparing monitoring output of changed geometries to reference"
+    - |
+      if [ ! -s $CI_PROJECT_DIR/to_test_geometries.txt ]; then
+        echo "No changed geometries to compare (nothing beyond defaults) — skipping."
+        exit 0
+      fi
+      for GEOMETRY in $(cat $CI_PROJECT_DIR/to_test_geometries.txt); do
+        echo "::group::Comparing $GEOMETRY"
+        python indetmplib/alice3/performance/plots/compare_monitoring.py \
+          --reference $CI_PROJECT_DIR/reference_files/pp_30pu/ \
+          --candidate $CI_PROJECT_DIR/output/monitoring_output_$GEOMETRY/ \
+          --output_dir comparison_output/$GEOMETRY
+        python CI/scripts/generate_index.py --output-dir comparison_output/$GEOMETRY --title test --convert-to-png
+      done
+  artifacts:
+    paths:
+      - comparison_output/
+    expire_in: 10 days
+    when: always
+
+# ------------------------
+# PAGES
+# ------------------------
+
+pages:
+  stage: compare
+  tags:
+    - cvmfs
+  needs:
+  - job: compare_alice3_default_geometries
+    artifacts: true
+  - job: compare_alice3_PbPbCentral
+    artifacts: true
+  - job: compare_alice3_geometry_changes
+    artifacts: true
+    optional: true
+  script:
+    - mkdir -p public
+    - cp -r comparison_output/* public/
+    - cp -r comparison_output_PbPbCentral/* public/
+  artifacts:
+    paths:
+    - public
+  environment:
+    #name: pages/$CI_COMMIT_REF_SLUG
+    #url: https://$CI_PROJECT_ROOT_NAMESPACE.gitlab.io/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public/index.html
+    name: pages/$CI_COMMIT_REF_SLUG
+    url: $CI_PAGES_URL
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: always
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+    - if: $CI_MERGE_REQUEST_IID
+      when: always
+
+
+#test_example:
+#  extends: .test_template
+#  script:
+#    - echo "::group::Running another example test"
+#    - python another_test.py
+
+# -----------------------
+# PIPELINE RULES
+# -----------------------
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+
+format_check:
+  stage: test
+  image: python:3.11-slim
+  # override default before_script/cache: they assume the Alma9/ccache build image, not this slim image
+  before_script: []
+  cache: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - pip install autopep8
+    - autopep8 --recursive --diff --exit-code --exclude acts .
+
+# Build ACTSO2 with aliBuild in a separate job, so that we can use the artifacts in the test jobs
+build_actso2_alibuild:
+  stage: build
+
+  image:
+    name: gitlab-registry.cern.ch/linuxsupport/alma9-base:9
+    pull_policy: if-not-present
+
+  allow_failure: true
+
+  cache: []
+
+  before_script:
+    - dnf install -y epel-release dnf-plugins-core
+    - dnf config-manager --set-enabled crb
+    - dnf group install -y "Development Tools"
+
+    - |
+      cat > /etc/yum.repos.d/alice-system-deps.repo <<'EOF'
+      [alice-system-deps]
+      name=alice-system-deps
+      baseurl=https://s3.cern.ch/swift/v1/alibuild-repo/RPMS/o2-full-deps_el9.x86-64/
+      enabled=1
+      gpgcheck=0
+      EOF
+
+    - dnf install -y alice-o2-full-deps alibuild git
+
+  script:
+    - |
+      export ALIBUILD_ROOT="/tmp/actso2-alibuild-${CI_JOB_ID}"
+
+      rm -rf "${ALIBUILD_ROOT}"
+      mkdir -p "${ALIBUILD_ROOT}"
+
+      echo "::group::Prepare aliBuild workspace"
+
+      # Only fetch recipes.
+      cd "${ALIBUILD_ROOT}"
+      aliBuild init HepMC3
+
+      # Current MR checkout becomes the ACTSO2 source.
+      ln -s "${CI_PROJECT_DIR}" "${ALIBUILD_ROOT}/ACTSO2"
+
+      echo "ACTSO2 commit:"
+      git -C ACTSO2 rev-parse HEAD
+
+      echo "alidist commit:"
+      git -C alidist rev-parse HEAD
+
+      echo "::group::Build ACTSO2"
+
+      aliBuild build ACTSO2 --jobs "${ALIBUILD_JOBS}" --remote-store https://s3.cern.ch/swift/v1/alibuild-repo
+      BUILD_STATUS=$?
+
+      if [ $BUILD_STATUS -ne 0 ]; then
+          echo "aliBuild build failed with status ${BUILD_STATUS}"
+          if [ -f "sw/BUILD/ACTSO2-latest/log" ]; then
+              echo "Copying aliBuild log to GitLab artifacts"
+              cp "sw/BUILD/ACTSO2-latest/log" "${CI_PROJECT_DIR}/ACTSO2-build.log"
+              echo
+              echo "================ LAST 200 LOG LINES ================"
+              tail -n 200 "${CI_PROJECT_DIR}/ACTSO2-build.log"
+              echo "====================================================="
+          else
+              echo "WARNING: aliBuild log not found"
+          fi
+      else
+          echo "aliBuild build succeeded"
+      fi
+
+      exit "${BUILD_STATUS}"
+
+  artifacts:
+    when: always
+    paths:
+      - ACTSO2-build.log
+    expire_in: 1 day
+
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

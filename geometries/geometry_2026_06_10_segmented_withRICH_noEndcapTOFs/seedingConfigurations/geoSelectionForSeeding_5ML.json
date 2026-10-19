@@ -1,0 +1,31 @@
+[
+    {
+        "NAME": "OuterPixels::NegativeEndcap",
+        "volume": 18
+    },   
+    {
+        "NAME": "OuterPixels::Barrel",
+        "volume": 19
+    },
+    {
+        "NAME": "OuterPixels::PositiveEndcap",
+        "volume": 20
+    },
+    {
+        "NAME": "InnerPixels::Barrel",
+        "volume": 15
+    },
+    {
+        "NAME": "OuterMostBarrel::Barrel",
+        "volume": 22
+    },
+    {
+        "NAME": "OuterMostEndcap::NegativeEndcap",
+        "volume": 6
+    },
+    {
+        "NAME": "OuterMostEndcap::PositiveEndcap",
+        "volume": 23
+    }
+
+]

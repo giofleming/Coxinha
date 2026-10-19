@@ -1,0 +1,1 @@
+o2-sim-serial-run5 -n 1 -g pythia8hi -m A3IP TRK FT3 TF3 --configKeyValues "TRKBase.layoutVD=kIRISFullCyl;TRKBase.layoutMLOT=kCylindrical;FT3Base.layoutFT3=kTrapezoidal;IOTOFBase.segmentedInnerTOF=false;IOTOFBase.segmentedOuterTOF=false"

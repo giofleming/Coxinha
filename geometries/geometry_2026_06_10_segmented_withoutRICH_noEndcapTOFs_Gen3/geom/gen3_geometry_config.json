@@ -1,0 +1,61 @@
+{
+  "_comment": "ALICE 3 Gen3 (Blueprint) geometry configuration. Reproduces the v0 header GeometryGen3_2026_06_10_segmented_withoutRICH_v0.h. NOTE: v0 predates End-of-Stave support, so endOfStaveMatches is empty (EoS attachment disabled). Differs from the newer configs in the region boundaries (rInnerCoreMax/rMainMax/zCentralMax/zMainMax), the carbon-support halfZ (1284), TRK_OuterBarrel_Services zMin (1328), the OUTERBARREL disc z (+-1322), and the passive-disc set (4 discs; no TRK_MIDBARCON, no EoS cards). All lengths in MILLIMETRES.",
+
+  "sensitiveMatches": ["*TRKSensor*", "*ITOFSensor*", "*OTOFSensor*", "*FT3Sensor_Active*"],
+
+  "endOfStaveMatches": [],
+  "endOfStaveRTol": 20.0,
+
+  "axesThinZ": "XYZ",
+  "axesThinY": "ZXY",
+
+  "rInnerCoreMax": 390.0,
+  "rMainMax": 821.0,
+  "zCentralMax": 1300.0,
+  "zMainMax": 2500.0,
+
+  "tolVertexDetector": 5.0,
+  "tolTrkBarrel": 15.0,
+  "tolItof": 5.0,
+  "tolOtof": 15.0,
+  "tolFt3Disc": 20.0,
+
+  "fwdDiscRMax": 690.0,
+
+  "matBinsPhi": 40,
+  "matBinsZ": 160,
+  "matBinsR": 20,
+
+
+  "passiveCylinders": [
+    {"name": "VD_OuterWall",           "r": 48.10, "halfZ": 350.0,  "zCentre": 0.0},
+    {"name": "TRK_MID_CarbonSupport",  "r": 394.0, "halfZ": 1284.0, "zCentre": 0.0},
+    {"name": "TRK_OT_CarbonSupport",   "r": 822.0, "halfZ": 1400.0, "zCentre": 0.0}
+  ],
+
+  "forwardCylinders": [
+    {"name": "TRK_OuterDisks_Services",  "r": 707.8, "zMin": 1490.0, "zMax": 3500.0},
+    {"name": "TRK_MIDFWD_Services",      "r": 748.0, "zMin": 1435.0, "zMax": 3500.0},
+    {"name": "TRK_OuterBarrel_Services", "r": 787.7, "zMin": 1328.0, "zMax": 3478.0}
+  ],
+
+  "passiveDiscs": [
+    {"name": "TRK_OUTERBARREL_Services_neg", "z": -1322.0, "rMin": 450.0, "rMax": 690.0},
+    {"name": "TRK_OUTERBARREL_Services_pos", "z":  1322.0, "rMin": 450.0, "rMax": 690.0},
+    {"name": "TRK_MIDBARFWD_Services_neg",   "z": -1431.0, "rMin": 385.0, "rMax": 690.0},
+    {"name": "TRK_MIDBARFWD_Services_pos",   "z":  1431.0, "rMin": 385.0, "rMax": 690.0},
+
+    {"name": "TRK_MIDBARCON_Services_pos",   "z":  650.0, "rMin": 57.0, "rMax": 390.0}
+    
+  ],
+
+  "volumeIds": {
+    "fwdNeg": 20,
+    "ft3InnerNeg": 30,
+    "innerBarrel": 40,
+    "outerTrackerBarrel": 50,
+    "ft3InnerPos": 60,
+    "fwdPos": 70,
+    "otof": 90
+  }
+}

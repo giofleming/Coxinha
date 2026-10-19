@@ -1,0 +1,18 @@
+[
+    {
+        "NAME": "InnerPixels::Barrel",
+        "layer": 2,
+        "volume": 14
+    },
+    {
+        "NAME": "InnerPixels::Barrel",
+        "layer": 4,
+        "volume": 14
+    },
+    {
+        "NAME": "InnerPixels::Barrel",
+        "layer": 6,
+        "volume": 14
+    }
+
+]

@@ -1,0 +1,383 @@
+{
+  "alice3-efficiency": {
+    "etaRange": {
+      "first": -1,
+      "second": 1
+    },
+    "pdgCodes": {
+      "values": [
+        211
+      ]
+    }
+  },
+  "alice3-lut-maker": {
+    "addQA": 0,
+    "enabledPdgs": {
+      "values": [
+        211
+      ]
+    },
+    "etaBins": 80,
+    "etaMax": 4,
+    "etaMin": -4,
+    "nchBins": 20,
+    "nchLog": 1,
+    "nchMax": 3.5,
+    "nchMin": 0.5,
+    "ptBins": 200,
+    "ptLog": 1,
+    "ptMax": 2,
+    "ptMin": -2,
+    "selPrim": 0
+  },
+  "alice3-tracking-performance": {
+    "etaAxis": {
+      "values": [
+        100,
+        -5,
+        5
+      ]
+    },
+    "ptAxis": {
+      "values": [
+        100,
+        0,
+        10
+      ]
+    },
+    "pdgCodes": {
+      "values": [
+        0,
+        211,
+        13,
+        -211,
+        -13
+      ]
+    }
+  },
+  "on-the-fly-detector-geometry-provider": {
+    "cleanLutWhenLoaded": 0,
+    "detectorConfiguration": {
+      "values": [
+        "../geometry.ini"
+      ]
+    }
+  },
+  "on-the-fly-rich-pid": {
+    "bRICHPixelSize": 0.2,
+    "bRichFlagAbsorbingWalls": 1,
+    "bRichGapRefractiveIndex": 1.000283,
+    "bRichNumberOfSectors": 24,
+    "bRichPhotodetectorCentralModuleHalfLength": 9.2,
+    "bRichPhotodetectorOtherModuleLength": 18.4,
+    "bRichPhotodetectorOuterRadius": 117,
+    "bRichRadiatorInnerRadius": 90,
+    "bRichRadiatorThickness": 2,
+    "bRichRefractiveIndex": 1.03,
+    "bRichRefractiveIndexSector0": 1.03,
+    "bRichRefractiveIndexSector1": 1.03,
+    "bRichRefractiveIndexSector10": 1.03,
+    "bRichRefractiveIndexSector11": 1.03,
+    "bRichRefractiveIndexSector12": 1.03,
+    "bRichRefractiveIndexSector13": 1.03,
+    "bRichRefractiveIndexSector14": 1.03,
+    "bRichRefractiveIndexSector15": 1.03,
+    "bRichRefractiveIndexSector16": 1.03,
+    "bRichRefractiveIndexSector17": 1.03,
+    "bRichRefractiveIndexSector18": 1.03,
+    "bRichRefractiveIndexSector19": 1.03,
+    "bRichRefractiveIndexSector2": 1.03,
+    "bRichRefractiveIndexSector20": 1.03,
+    "bRichRefractiveIndexSector3": 1.03,
+    "bRichRefractiveIndexSector4": 1.03,
+    "bRichRefractiveIndexSector5": 1.03,
+    "bRichRefractiveIndexSector6": 1.03,
+    "bRichRefractiveIndexSector7": 1.03,
+    "bRichRefractiveIndexSector8": 1.03,
+    "bRichRefractiveIndexSector9": 1.03,
+    "doQAplots": 1,
+    "flagIncludeTrackAngularRes": 1,
+    "flagRICHLoadDelphesLUTs": 0,
+    "gasRadiatorRindex": 1.00059998,
+    "gasRichRadiatorThickness": 25,
+    "multiplicityEtaRange": 0.800000012,
+    "nBinsAngularRes": 400,
+    "nBinsEta": 400,
+    "nBinsNsigmaCorrectSpecies": 200,
+    "nBinsNsigmaWrongSpecies": 200,
+    "nBinsP": 400,
+    "nBinsRelativeEtaPt": 400,
+    "nBinsThetaRing": 3000,
+    "nStepsLIntegrator": 200
+  },
+  "on-the-fly-tof-pid": {
+    "considerEventTime": 1,
+    "doQAplots": 1,
+    "doSeparationVsPt": 1,
+    "flagIncludeTrackTimeRes": 1,
+    "flagTOFLoadDelphesLUTs": 0,
+    "innerTOFFractionOfInactiveArea": -0.9,
+    "innerTOFLength": 124,
+    "innerTOFPixelDimension": {
+      "_M_elems[0]": 0.1,
+      "_M_elems[1]": 20
+    },
+    "innerTOFRadius": 20,
+    "innerTOFTimeReso": 20,
+    "maxDeltaRange": 10000,
+    "maxMultRange": 200,
+    "maxNsigmaRange": 100,
+    "minDeltaRange": -10000,
+    "minNsigmaRange": -10,
+    "multiplicityEtaRange": 0.800000012,
+    "nBinsBeta": 4400,
+    "nBinsDeltaCorrectSpecies": 200,
+    "nBinsDeltaWrongSpecies": 200,
+    "nBinsEta": 400,
+    "nBinsMult": 200,
+    "nBinsNsigmaCorrectSpecies": 200,
+    "nBinsNsigmaWrongSpecies": 200,
+    "nBinsP": 320,
+    "nBinsRelativeEtaPt": 400,
+    "nBinsTimeRes": 400,
+    "nBinsTrackDeltaLength": 100,
+    "nBinsTrackLengthInner": 300,
+    "nBinsTrackLengthOuter": 300,
+    "nStepsLIntegrator": 200,
+    "outerTOFFractionOfInactiveArea": -0.5,
+    "outerTOFLength": 250,
+    "outerTOFPixelDimension": {
+      "_M_elems[0]": 0.100000001,
+      "_M_elems[1]": 0.100000001
+    },
+    "outerTOFRadius": 80,
+    "outerTOFTimeReso": 20
+  },
+  "on-the-fly-tracker": {
+    "axisDCA": {
+      "values": [
+        400,
+        -200,
+        200
+      ]
+    },
+    "axisDecayRadius": {
+      "values": [
+        55,
+        0.01,
+        100
+      ]
+    },
+    "axisDeltaEta": {
+      "values": [
+        200,
+        -0.5,
+        0.5
+      ]
+    },
+    "axisDeltaPt": {
+      "values": [
+        200,
+        -1,
+        1
+      ]
+    },
+    "axisK0Mass": {
+      "values": [
+        200,
+        0.4000000059604645,
+        0.6000000238418579
+      ]
+    },
+    "axisLambdaMass": {
+      "values": [
+        200,
+        1.1009999513626099,
+        1.13100004196167
+      ]
+    },
+    "axisMomentum": {
+      "values": [
+        0,
+        0,
+        0.10000000149011612,
+        0.20000000298023224,
+        0.30000001192092896,
+        0.4000000059604645,
+        0.5,
+        0.6000000238418579,
+        0.699999988079071,
+        0.800000011920929,
+        0.8999999761581421,
+        1,
+        1.100000023841858,
+        1.2000000476837158,
+        1.2999999523162842,
+        1.399999976158142,
+        1.5,
+        1.600000023841858,
+        1.7000000476837158,
+        1.7999999523162842,
+        1.899999976158142,
+        2,
+        2.200000047683716,
+        2.4000000953674316,
+        2.5999999046325684,
+        2.799999952316284,
+        3,
+        3.200000047683716,
+        3.4000000953674316,
+        3.5999999046325684,
+        3.799999952316284,
+        4,
+        4.400000095367432,
+        4.800000190734863,
+        5.199999809265137,
+        5.599999904632568,
+        6,
+        6.5,
+        7,
+        7.5,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        17,
+        19,
+        21,
+        23,
+        25,
+        30,
+        35,
+        40,
+        50
+      ]
+    },
+    "axisMultiplicity": {
+      "values": [
+        1000,
+        -0.5,
+        19999.5
+      ]
+    },
+    "axisNVertices": {
+      "values": [
+        1,
+        -0.5,
+        0.5
+      ]
+    },
+    "axisPtRes": {
+      "values": [
+        200,
+        -0.4000000059604645,
+        0.4000000059604645
+      ]
+    },
+    "axisRadius": {
+      "values": [
+        2500,
+        0,
+        250
+      ]
+    },
+    "axisVertexZ": {
+      "values": [
+        40,
+        -20,
+        20
+      ]
+    },
+    "axisX": {
+      "values": [
+        250,
+        -50,
+        200
+      ]
+    },
+    "axisXiMass": {
+      "values": [
+        200,
+        1.2200000286102295,
+        1.4199999570846558
+      ]
+    },
+    "axisZ": {
+      "values": [
+        100,
+        -250,
+        250
+      ]
+    },
+    "cascadeDecaySettings.decayXi": 1,
+    "cascadeDecaySettings.doXiQA": 1,
+    "cascadeDecaySettings.findXi": 1,
+    "cascadeDecaySettings.trackXi": 1,
+    "doExtraQA": 1,
+    "enableNucleiSmearing": 0,
+    "enablePrimarySmearing": 1,
+    "enablePrimaryVertexing": 0,
+    "enableSecondarySmearing": 1,
+    "extraQAwithoutDecayDaughters": 1,
+    "fastPrimaryTrackerSettings.applyEffCorrection": 1,
+    "fastPrimaryTrackerSettings.applyElossCorrection": 1,
+    "fastPrimaryTrackerSettings.applyMSCorrection": 1,
+    "fastPrimaryTrackerSettings.applyZacceptance": 0,
+    "fastPrimaryTrackerSettings.fastTrackPrimaries": 0,
+    "fastPrimaryTrackerSettings.minSiliconHits": 4,
+    "fastTrackerSettings.applyEffCorrection": 1,
+    "fastTrackerSettings.applyElossCorrection": 1,
+    "fastTrackerSettings.applyMSCorrection": 1,
+    "fastTrackerSettings.applyZacceptance": 0,
+    "fastTrackerSettings.minSiliconHits": 6,
+    "fastTrackerSettings.minSiliconHitsIfTPCUsed": 2,
+    "fastTrackerSettings.minTPCClusters": 70,
+    "fastTrackerSettings.pixelRes": {
+      "values": [
+        0.0002500000118743628,
+        0.0002500000118743628,
+        0.0010000000474974513,
+        0.0010000000474974513
+      ]
+    },
+    "fastTrackerSettings.scaleVD": 1,
+    "interpolateLutEfficiencyVsNch": 1,
+    "maxEta": 4,
+    "minPt": 0.01,
+    "multEtaRange": 2,
+    "populateTrackSelection": 0,
+    "populateTracksDCA": 1,
+    "populateTracksDCACov": 1,
+    "populateTracksExtra": 0,
+    "primaryVertexOption": "pvertexer.maxChi2TZDebris=10;pvertexer.acceptableScale2=9;pvertexer.minScale2=2;pvertexer.timeMarginVertexTime=1.3;;pvertexer.maxChi2TZDebris=40;pvertexer.maxChi2Mean=12;pvertexer.maxMultRatDebris=1.;pvertexer.addTimeSigma2Debris=1e-2;pvertexer.meanVertexExtraErrSelection=0.03;",
+    "processDecayer": 0,
+    "processOnTheFly": 1,
+    "processUnreconstructedTracks": 0,
+    "seed": 0,
+    "v0DecaySettings.decayV0": 0,
+    "v0DecaySettings.doV0QA": 0,
+    "v0DecaySettings.findV0": 0
+  },
+  "on-the-fly-tracker-initializer": {},
+  "on-the-fly-tracker-pid": {
+    "analysisEtaMax": 1,
+    "analysisEtaMin": 0,
+    "analysisPtMax": 10,
+    "analysisPtMin": 0,
+    "lutTotAl": "ccdb:Users/h/hfribert/ToT_LUTs/PDG_1000020040/",
+    "lutTotDe": "ccdb:Users/h/hfribert/ToT_LUTs/PDG_1000010020/",
+    "lutTotEl": "ccdb:Users/h/hfribert/ToT_LUTs/PDG_11/",
+    "lutTotHe": "ccdb:Users/h/hfribert/ToT_LUTs/PDG_1000020030/",
+    "lutTotKa": "ccdb:Users/h/hfribert/ToT_LUTs/PDG_321/",
+    "lutTotMu": "ccdb:Users/h/hfribert/ToT_LUTs/PDG_13/",
+    "lutTotPi": "ccdb:Users/h/hfribert/ToT_LUTs/PDG_211/",
+    "lutTotPr": "ccdb:Users/h/hfribert/ToT_LUTs/PDG_2212/",
+    "lutTotTr": "ccdb:Users/h/hfribert/ToT_LUTs/PDG_1000010030/",
+    "maxBarrelLayers": 11,
+    "numLogBins": 200
+  }
+}
